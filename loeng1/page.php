@@ -5,25 +5,28 @@
 
     $hour_now = date("H");
     $part_of_day = "hägune aeg";
+    $body_bgcolor = "lightgray";
 
     if ($hour_now < 10) {
         $part_of_day = "hommik";
+        $body_bgcolor = "lightblue";
     }
     elseif ($hour_now < 18) {
         $part_of_day = "aeg aktiivselt tegutseda";
+        $body_bgcolor = "lightsalmon";
     }
 
-    $part_of_day_HTML = "<p>Käes on ". $part_of_day ."!</p>\n";
+    $part_of_day_HTML = "<p>Käes on <b>". $part_of_day ."</b>!</p>\n";
 
     $semester_start = new DateTime("2020-01-27");
     $semester_end = new DateTime("2020-06-22");
     $semester_duration = $semester_start->diff($semester_end);
     //var_dump($semester_duration);
     $today = new DateTime("now");
-    $from_semester_start = $semester_start->diff($today);
+    $from_semester_start = $semester_start->diff($today, FALSE);
     //var_dump($from_semester_start);
 
-    if ($from_semester_start->days < 1) {
+    if ($from_semester_start->format("%r%a") < 1) {
         $semester_duration_HTML = "<p>Semester pole veel alanud!</p>";
     }
     elseif ($from_semester_start->days > $semester_duration->days) {
@@ -56,10 +59,20 @@
     }
     //var_dump($photo_list);
     $photo_count = count($photo_list);
-    $photo_num = mt_rand(0, $photo_count-1);
+    $photo_num = [];
 
-    $random_image_HTML = '<img src="'. $pics_dir . $photo_list[$photo_num]
-            .'" alt="Juhuslik pilt Haapsalust" />'. "\n";
+    foreach ([0,1,2] as $i) {
+        do {
+            $num = mt_rand(0, $photo_count-1);
+        } while (in_array($num, $photo_num));
+        $photo_num[] = $num;
+    }
+
+    $random_image_HTML = '';
+    foreach ($photo_num as $num) {
+        $random_image_HTML .= '<img src="'. $pics_dir . $photo_list[$num]
+                .'" alt="Juhuslik pilt Haapsalust '. $num .'" width="320" />'. "\n";
+    }
 ?>
 <!DOCTYPE html>
 <html lang="et">
@@ -67,7 +80,8 @@
 	<meta charset="utf-8">
 	<title>Veebirakendused ja nende loomine 2020</title>
     <style>
-body {max-width:980px; margin: 3vw auto}
+body {max-width:1024px; margin: 3vw auto;background-color:<?= $body_bgcolor ?>}
+img{margin:5px;border:1px solid darkgray;border-radius:1em}
     </style>
 </head>
 <body>
