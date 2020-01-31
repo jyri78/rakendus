@@ -70,7 +70,7 @@
 
     $random_image_HTML = '';
     foreach ($photo_num as $num) {
-        $random_image_HTML .= '<img src="'. $pics_dir . $photo_list[$num]
+        $random_image_HTML .= '    <img src="'. $pics_dir . $photo_list[$num]
                 .'" alt="Juhuslik pilt Haapsalust '. $num .'" width="320" />'. "\n";
     }
 ?>
@@ -90,6 +90,6 @@ img{margin:5px;border:1px solid darkgray;border-radius:1em}
     <?= $time_HTML ?>
     <?= $part_of_day_HTML ?>
     <?= $semester_duration_HTML ?>
-    <?= $random_image_HTML ?>
+<?= $random_image_HTML ?>
 </body>
 </html>
