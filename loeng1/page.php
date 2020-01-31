@@ -39,7 +39,7 @@
     }
 
     // Fotode lugemine
-    $pics_dir = "../../pics/";
+    $pics_dir = "../pics/";
     $photo_types_allowed = ["image/jpeg", "image/png"];
     $photo_list = [];
 
