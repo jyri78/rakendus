@@ -7,6 +7,7 @@
     $part_of_day = "hägune aeg";
     $body_bgcolor = "lightgray";
 
+    //~ Ajaline kontroll
     if ($hour_now < 10) {
         $part_of_day = "hommik";
         $body_bgcolor = "lightblue";
@@ -26,6 +27,8 @@
     $from_semester_start = $semester_start->diff($today, FALSE);
     //var_dump($from_semester_start);
 
+    //~ Kui semester pole veel alanud või juba läbi, siis teavitab sellest,
+    //~ muidu väljastab tag'i meter
     if ($from_semester_start->format("%r%a") < 1) {
         $semester_duration_HTML = "<p>Semester pole veel alanud!</p>";
     }
@@ -41,7 +44,10 @@
                 . "\n";
     }
 
-    // Fotode lugemine
+    /* -----------------------------------------------------------------
+        Fotode lugemine kaustast
+       -----------------------------------------------------------------
+    */
     $pics_dir = "../pics/";
     $photo_types_allowed = ["image/jpeg", "image/png"];
     $photo_list = [];
@@ -52,6 +58,7 @@
     foreach ($all_files as $file) {
         $file_info = getimagesize($pics_dir . $file);
 
+        //~ Kas on pilt
         if (in_array($file_info["mime"], $photo_types_allowed)) {
             $photo_list[] = $file;
             //array_push($photo_list, $file);
@@ -64,7 +71,8 @@
     foreach ([0,1,2] as $i) {
         do {
             $num = mt_rand(0, $photo_count-1);
-        } while (in_array($num, $photo_num));
+        } while (in_array($num, $photo_num));  //~ esitab ainult unikaalsed pildid
+
         $photo_num[] = $num;
     }
 
