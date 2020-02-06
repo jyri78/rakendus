@@ -6,6 +6,7 @@
     $hour_now = date("H");
     $part_of_day = "hägune aeg";
     $body_bgcolor = "lightgray";
+    $body_color = "black";
 
     //~ Ajaline kontroll
     if ($hour_now < 10) {
@@ -14,7 +15,8 @@
     }
     elseif ($hour_now < 18) {
         $part_of_day = "aeg aktiivselt tegutseda";
-        $body_bgcolor = "lightsalmon";
+        $body_bgcolor = "salmon";
+        $body_color = "white";
     }
 
     $part_of_day_HTML = "<p>Käes on <b>". $part_of_day ."</b>!</p>\n";
@@ -88,7 +90,7 @@
 	<meta charset="utf-8">
 	<title>Veebirakendused ja nende loomine 2020</title>
     <style>
-body {max-width:1024px; margin: 3vw auto;background-color:<?= $body_bgcolor ?>}
+body {background-color:<?= $body_bgcolor ?>; color:<?= $body_color ?>; max-width:1024px; margin:3vw auto}
 img{margin:5px;border:1px solid darkgray;border-radius:1em}
     </style>
 </head>
