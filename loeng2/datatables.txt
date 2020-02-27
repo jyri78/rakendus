@@ -1,0 +1,12 @@
+Uudiste tabel
+
+CREATE TABLE `jurikormik`.`vr20_news` (
+    `id` INT(11) NULL AUTO_INCREMENT ,
+    `userid` INT(11) NOT NULL ,
+    `title` VARCHAR(100) NOT NULL ,
+    `content` VARCHAR(1500) NOT NULL ,
+    `created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+    `deleted` DATETIME NULL ,
+    `picture` INT(11) NULL ,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB;
