@@ -12,6 +12,7 @@ function test_input($data) {
 function saveNews($newsTitle, $newsContent) {
     $userid = 1;
     $response = null;
+    $errorMessage = null;
 
     //~ Loob andmebaasiühenduse
     $conn = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
@@ -29,7 +30,39 @@ function saveNews($newsTitle, $newsContent) {
     }
     else {
         $response = 0;
-        echo $stmt->error;
+        $errorMessage = $stmt->error;
+    }
+
+    //~ Sulgeb päringu ja andmebaasi ühenduse
+    $stmt->close();
+    $conn->close();
+
+    return [$response, $errorMessage];
+}
+
+function readNews() {
+    global $num;
+    $response = null;
+
+    //~ Loob andmebaasiühenduse ja valmistab ette SQL päringu
+    $conn = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
+    $stmt = $conn->prepare("SELECT id, title, content, created, deleted
+                            FROM vr20_news WHERE deleted IS NULL ORDER BY created DESC");
+    //echo $conn->error;
+
+    $stmt->bind_result($idFromDB, $titleFromDB, $contentFromDB, $createdFromDB, $deletedFromDB);
+    $stmt->execute();
+    //if ($stmt->fetch())
+
+    while ($stmt->fetch()) {
+        $response .= "\n".'<div id="'. $num . $idFromDB .'" class="newsItem"><a data-id="'
+                . $num . $idFromDB .'" href="#" onclick="return deleteNews(this,\''
+                . $titleFromDB .'\')" title="Delete news" class="closeBtn"'
+                .'>❌</a><h2 class="card-title">'. $titleFromDB .'</h2><div class="date">'
+                . $createdFromDB .'</div><p class="card-text">'. $contentFromDB .'</p></div>';
+    }
+    if ($response == null) {
+        $response = '<div class="alert alert-warning">Kahjuks uudised puuduvad!</div>';
     }
 
     //~ Sulgeb päringu ja andmebaasi ühenduse
@@ -39,29 +72,25 @@ function saveNews($newsTitle, $newsContent) {
     return $response;
 }
 
-function readNews() {
+function deleteNews($id) {
+    $ok = true;
     $response = null;
 
-    //~ Loob andmebaasiühenduse ja valmistab ette SQL päringu
+    //~ Loob andmebaasiühenduse
     $conn = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
-    $stmt = $conn->prepare("SELECT title, content FROM vr20_news");
-    //echo $conn->error;
 
-    $stmt->bind_result($titleFromDB, $contentFromDB);
-    $stmt->execute();
-    //if ($stmt->fetch())
+    //~ Valmistab ette SQL päringu
+    $stmt = $conn->prepare("UPDATE vr20_news SET deleted=NOW() WHERE id=?");
+    $stmt->bind_param("i", $id);
 
-    while ($stmt->fetch()) {
-        $response .= "\n<div style=\"border:1px solid lightgrey;padding:5px;border-radius:5px\"><h2>". $titleFromDB ."</h2>";
-        $response .= "<p>". $contentFromDB ."</p></div>";
-    }
-    if ($response == null) {
-        $response = "<P>Kahjuks uudised puuduvad!</p>";
+    if ($stmt->execute() === false) {
+        $ok = false;
     }
 
     //~ Sulgeb päringu ja andmebaasi ühenduse
     $stmt->close();
     $conn->close();
 
-    return $response;
+    if ($ok) echo 'OK!';
+    else     echo 'ERROR!';
 }
