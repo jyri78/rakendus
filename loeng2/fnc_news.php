@@ -40,26 +40,33 @@ function saveNews($newsTitle, $newsContent) {
     return [$response, $errorMessage];
 }
 
-function readNews() {
-    global $num;
+function readNews($num, $limit) {
     $response = null;
 
     //~ Loob andmebaasiühenduse ja valmistab ette SQL päringu
     $conn = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
     $stmt = $conn->prepare("SELECT id, title, content, created, deleted
-                            FROM vr20_news WHERE deleted IS NULL ORDER BY created DESC");
+                            FROM vr20_news WHERE deleted IS NULL ORDER BY created DESC LIMIT ?");
     //echo $conn->error;
 
+    $stmt->bind_param("i", $limit);
     $stmt->bind_result($idFromDB, $titleFromDB, $contentFromDB, $createdFromDB, $deletedFromDB);
     $stmt->execute();
     //if ($stmt->fetch())
 
     while ($stmt->fetch()) {
-        $response .= "\n".'<div id="'. $num . $idFromDB .'" class="newsItem"><a data-id="'
-                . $num . $idFromDB .'" href="#" onclick="return deleteNews(this,\''
-                . $titleFromDB .'\')" title="Delete news" class="closeBtn"'
-                .'>❌</a><h2 class="card-title">'. $titleFromDB .'</h2><div class="date">'
-                . $createdFromDB .'</div><p class="card-text">'. $contentFromDB .'</p></div>';
+        $response .= "\n".'<div id="'. $num . $idFromDB .'" class="newsItem">'
+                // Sulgemisnupp
+                .'<a data-id="'. $num . $idFromDB .'" href="#" '
+                .'onclick="return deleteNews(this,\''. $titleFromDB .'\')" '
+                .'title="Delete news" class="closeBtn">❌</a>'
+                // Uudise pealkiri
+                .'<h2 class="card-title">'. $titleFromDB .'</h2>'
+                // Uudise kuupäev, aga ette veel uudise ID (kontrolliks)
+                .'<div class="date"><span class="badge badge-pill badge-info align-top">'
+                . $idFromDB .'</span> '. $createdFromDB .'</div>'
+                // Viimaseks uudise sisu
+                .'<p class="card-text">'. $contentFromDB .'</p></div>';
     }
     if ($response == null) {
         $response = '<div class="alert alert-warning">Kahjuks uudised puuduvad!</div>';

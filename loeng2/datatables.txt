@@ -1,4 +1,5 @@
-Uudiste tabel
+
+    Uudiste tabel
 
 CREATE TABLE `jurikormik`.`vr20_news` (
     `id` INT(11) NULL AUTO_INCREMENT ,
@@ -10,3 +11,34 @@ CREATE TABLE `jurikormik`.`vr20_news` (
     `picture` INT(11) NULL ,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB;
+
+
+    Õppimise logi tabel
+
+CREATE TABLE `jurikormik`.`vr20_study_courses` (
+    `id` INT(5) NOT NULL AUTO_INCREMENT ,
+    `course` VARCHAR(100) NOT NULL ,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB;
+
+CREATE TABLE `jurikormik`.`vr20_study_activities` (
+    `id` INT(3) NOT NULL AUTO_INCREMENT ,
+    `activity` VARCHAR(100) NOT NULL ,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB;
+
+CREATE TABLE `jurikormik`.`vr20_studylog` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT ,
+    `course` INT(5) NOT NULL ,
+    `activity` INT(3) NOT NULL ,
+    `time` DECIMAL(5,2) NOT NULL ,
+    `day` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB;
+
+ALTER TABLE `vr20_studylog`
+ADD FOREIGN KEY (`course`) REFERENCES `vr20_study_courses` (`id`)
+
+ALTER TABLE `vr20_studylog`
+ADD FOREIGN KEY (`activity`) REFERENCES `vr20_study_activities` (`id`)
+
