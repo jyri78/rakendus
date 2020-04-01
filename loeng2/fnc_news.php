@@ -16,6 +16,7 @@ function saveNews($newsTitle, $newsContent) {
 
     //~ Loob andmebaasiühenduse
     $conn = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
+    $conn->set_charset("utf8mb4");
 
     //~ Valmistab ette SQL päringu
     $stmt = $conn->prepare("INSERT INTO vr20_news (userid, title, content) VALUES (?, ?, ?)");
@@ -45,6 +46,7 @@ function readNews($num, $limit) {
 
     //~ Loob andmebaasiühenduse ja valmistab ette SQL päringu
     $conn = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
+    $conn->set_charset("utf8mb4");
     $stmt = $conn->prepare("SELECT id, title, content, created, deleted
                             FROM vr20_news WHERE deleted IS NULL ORDER BY created DESC LIMIT ?");
     //echo $conn->error;
@@ -85,6 +87,7 @@ function deleteNews($id) {
 
     //~ Loob andmebaasiühenduse
     $conn = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
+    $conn->set_charset("utf8mb4");
 
     //~ Valmistab ette SQL päringu
     $stmt = $conn->prepare("UPDATE vr20_news SET deleted=NOW() WHERE id=?");

@@ -1,11 +1,22 @@
 <?php
+require "../inc/fnc.php";
 require "fnc_news.php";
+
 $_self = filter_var($_SERVER["PHP_SELF"], FILTER_SANITIZE_URL);
 
 
-// Sessioon võimaldab seadeid "meelde jätta" ehk toimib sarnaselt brauseri küpsistele,
-// kuid erinevalt küpsistele salvestatakse andmed serverisse ehk teave internetti ei jõua
-session_start();
+SessionManager::sessionStart(SESSION_NAME, 0, SESSION_PATH, SESSION_DOMAIN);
+
+
+// Lubab lehte kuvada ainult sisseloginul
+if (!isset($_SESSION["userid"])) {
+    // jõuga avalehele
+    $_SESSION['errPage'] = 'addnews.php';
+    $_SESSION['error'] = 'Uudise lisaseks logi esmalt sisse.';
+    header("Location: page.php");
+    exit;
+}
+
 
 // Tühistab uudiste lehe kontrollnumbri
 unset($_SESSION["controlNum"]);
@@ -59,28 +70,21 @@ elseif (isset($_SESSION["alert"]) && $_SESSION["alert"] == "success") {
 // Lõpuks HTML vormile lisatav sisu, kui on
 $newsTitle = $_SESSION["newsTitle"] ?? '';
 $newsContent = $_SESSION["newsContent"] ?? '';
+
+
+/* =========================================================================
+    Lehe päis
+   =========================================================================
+*/
+$_page = array(
+    'title' => 'Loeng 3',
+    'h1' => 'Uudise lisamine',
+    'current' => 'addnews.php',
+    'pages' => [['page.php', 'Loengu leht'], ['addnews.php', 'Lisa uudis'], ['news.php', 'Loe uudised']]
+);
+
+require '../inc/_header.inc';
 ?>
-<!DOCTYPE html>
-<html lang="et">
-<head>
-	<meta charset="utf-8">
-    <title>Teine loeng | Veebirakendused ja nende loomine 2020</title>
-    <link rel="stylesheet"
-            href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-</head>
-<body>
-<div class="container">
-    <nav class="navbar navbar-expand-sm bg-light navbar-light justify-content-center"
-            style="margin-bottom:2vw">
-        <ul class="navbar-nav">
-            <li class="nav-item border-right"><a class="nav-link" href="/~juri.kormik/"
-                    data-toggle="tooltip" title="Pealehele">🏠</a></li>
-            <li class="nav-item"><a class="nav-link" href="./">Tagasi</a></li>
-            <li class="nav-item"><a class="nav-link disabled" href="#">Lisa uudis</a></li>
-            <li class="nav-item"><a class="nav-link" href="news.php">Uudised</a></li>
-        </ul>
-    </nav>
-    <h1>Uudiste lisamine</h1>
 
     <form method="post" action="<?= $_self ?>" class="was-validated">
         <div class="input-group my-3">
@@ -108,13 +112,15 @@ if (isset($_SESSION["alert"])):
 
     <div class="alert alert-<?= $_SESSION["alert"] ?>">
         <strong><?= $_SESSION["alert-title"] ?>!</strong> <?= $_SESSION["newsError"] ?> 
-    </div><?php
+    </div>
+<?php
 endif;    
-?>
 
-</div>
-</body>
-</html><?php
+require '../inc/_footer.inc';
+
 // Nüüd võib sessiooni andmed kustutada
-session_unset();
-session_write_close();
+/*session_unset();
+session_write_close();*/
+unset($_SESSION['alert']);
+unset($_SESSION['alert-title']);
+unset($_SESSION['newsError']);

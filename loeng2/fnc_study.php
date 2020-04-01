@@ -12,6 +12,7 @@ function _saveCA($field, $table, $value) {
 
     //~ Loob andmebaasiühenduse
     $conn = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
+    $conn->set_charset("utf8mb4");
 
     //~ Valmistab ette SQL päringu
     // Kuigi muutuja kasutamine otse päringus ei ole soovitatav, siis antud
@@ -55,6 +56,7 @@ function _readCA($field, $table, $word, $outType) {
 
     //~ Loob andmebaasiühenduse ja valmistab ette SQL päringu
     $conn = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
+    $conn->set_charset("utf8mb4");
     $stmt = $conn->prepare("SELECT id, ${field} FROM vr20_study_${table} ORDER BY id");
     //echo $conn->error;
 
@@ -114,6 +116,7 @@ function saveStudy($course, $activity, $time) {
 
     //~ Loob andmebaasiühenduse
     $conn = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
+    $conn->set_charset("utf8mb4");
 
     //~ Valmistab ette SQL päringu
     $stmt = $conn->prepare(
@@ -145,6 +148,7 @@ function readStudy() {
 
     //~ Loob andmebaasiühenduse ja valmistab ette SQL päringu
     $conn = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
+    $conn->set_charset("utf8mb4");
 
     // Kuna kursused ja tegevused eraldi tabelites ja õppelogi tabelis võõrvõti,
     // siis tuleb id-väljad päringus vastavalt ühendada (käsuga INNER JOIN),
