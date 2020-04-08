@@ -9,7 +9,7 @@
     */
     if (isset($_GET["logout"])) {
         session_destroy();
-        header("Location: page.php");
+        header("Location: ". $_self);
     }
 
 
@@ -125,7 +125,6 @@
     Lehe päis
    =========================================================================
 */
-$_self = filter_var($_SERVER["PHP_SELF"], FILTER_SANITIZE_URL);
 $_page = array(
     'title' => 'Loeng 4',
     'h1' => '4. loengu leht',
