@@ -1,0 +1,16 @@
+
+
+    Fotode tabel
+
+CREATE TABLE `jurikormik`.`vr20_photos` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT ,
+    `userid` INT(11) NOT NULL ,
+    `filename` VARCHAR(40) NOT NULL ,
+    `origname` VARCHAR(256) NULL ,
+    `thumb` BLOB NOT NULL ,
+    `created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+    `alttext` VARCHAR(256) NULL ,
+    `privacy` INT(1) NOT NULL ,
+    `deleted` DATE NULL ,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB;

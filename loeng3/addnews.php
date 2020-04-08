@@ -2,11 +2,6 @@
 require "../inc/fnc.php";
 require "fnc_news.php";
 
-$_self = filter_var($_SERVER["PHP_SELF"], FILTER_SANITIZE_URL);
-
-
-SessionManager::sessionStart(SESSION_NAME, 0, SESSION_PATH, SESSION_DOMAIN);
-
 
 // Lubab lehte kuvada ainult sisseloginul
 if (!isset($_SESSION["userid"])) {

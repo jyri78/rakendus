@@ -36,7 +36,7 @@ class DB {
         $this->_stmt->bind_param($types, ...$values);
         $this->_stmt->execute();
         $this->_stmtResult = $this->_stmt->get_result();
-        $this->stmtError = $this->_stmt->error;
+        $this->stmtError = $this->_stmt->errno .' '. $this->_stmt->error;
     }
 
 
@@ -56,8 +56,12 @@ class DB {
         if(!$values) {
             $this->_stmtResult = $this->_mysqli->query($sql); //Use non-prepared query if no values to bind for efficiency
         } else {
-            $this->_stmt = $this->_mysqli->prepare($sql);
-            $this->_execute($values, $types);
+            if ($this->_stmt = $this->_mysqli->prepare($sql)) {
+               $this->_execute($values, $types);
+        } else {  //kui viga SQL päringus
+                $this->error = $this->_mysqli->errno .' '. $this->_mysqli->error;
+            }
+            
         }
 
         return $this;
@@ -75,6 +79,9 @@ class DB {
 
     function fetch ($fetchType = 'assoc', $className = 'stdClass', $classParams = []) {
         $row = [];
+
+        // Kui päringutulemusi ei ole, tagastab tühja massiivi
+        if (!isset($this->_stmtResult)) return [];
 
         if (!in_array($fetchType, ['assoc', 'num', 'obj'])) {
             $fetchType = 'assoc';
@@ -97,6 +104,9 @@ class DB {
 
     function fetchAll ($fetchType = 'assoc', $className = 'stdClass', $classParams = []): array {
         $arr = [];
+
+        // Kui päringutulemusi ei ole, tagastab tühja massiivi
+        if (!isset($this->_stmtResult)) return [];
 
         if (!in_array($fetchType, ['assoc', 'num', 'obj', 'keyPairArr', 'group'])) {
             $fetchType = 'assoc';

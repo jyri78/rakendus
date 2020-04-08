@@ -5,7 +5,7 @@ require "../inc/fnc.php";
 // Sessiooni käivitamine või kasutamine
 //session_start();
 //require("classes/Session.class.php");
-SessionManager::sessionStart(SESSION_NAME, 0, SESSION_PATH, SESSION_DOMAIN);
+//SessionManager::sessionStart(SESSION_NAME, 0, SESSION_PATH, SESSION_DOMAIN);
 
 //var_dump($_SESSION);
 

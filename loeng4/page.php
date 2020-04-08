@@ -4,6 +4,16 @@
 
 
     /* =========================================================================
+        Väljalogimine
+       =========================================================================
+    */
+    if (isset($_GET["logout"])) {
+        session_destroy();
+        header("Location: page.php");
+    }
+
+
+    /* =========================================================================
         Sisselogimine
        =========================================================================
     */
@@ -13,9 +23,9 @@
     $passwordError = null;
 
     if(isset($_POST["login"])){
-		if (isset($_POST["email"]) and !empty($_POST["email"])){
-		  $email = test_input($_POST["email"]);
-		} else {
+        $email = test_input($_POST["email"] ?? '');
+
+		if (empty($email)) {
 		  $emailError = "Palun sisesta kasutajatunnusena e-posti aadress!";
 		}
 	  
@@ -117,13 +127,12 @@
 */
 $_self = filter_var($_SERVER["PHP_SELF"], FILTER_SANITIZE_URL);
 $_page = array(
-    'title' => 'Loeng 3',
-    'h1' => '3. loengu leht',
-    'current' => 'page.php',
-    'pages' => [['page.php', 'Loengu leht'], ['home.php', 'Äge leht']]
+    'title' => 'Loeng 4',
+    'h1' => '4. loengu leht',
+    'current' => $_self,
+    'pages' => [['page.php', 'Loengu leht'], ['home.php', 'Äge leht'],
+                ['photoUpload.php', 'Fotode üleslaadimine'], ['gallery.php', 'Fotogalerii']]
 );
-
-if (!isset($_SESSION['userid'])) $_page['pages'][] = ['newuser.php', 'Lisa kasutaja'];
 
 require '../inc/_header.inc';
 ?>
@@ -141,7 +150,7 @@ if (isset($_SESSION['userid'])):
 ?>
 
         <h3><?= $_SESSION['userFirstName'] .' '. $_SESSION['userLastName'] ?></h3>
-        <div><a class="btn btn-primary btn-block my-3" role="button" href="home.php?logout=1">Logi välja</a></div>
+        <div><a class="btn btn-primary btn-block my-3" role="button" href="<?= $_self ?>?logout=1">Logi välja</a></div>
 <?php
 else:
 ?>

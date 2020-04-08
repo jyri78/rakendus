@@ -1,5 +1,4 @@
 <?php
-//  require("../../../../configuration.php");
 require "../inc/fnc.php";
 require "fnc_users.php";
 
