@@ -114,17 +114,14 @@ function getGallery($privacy) {
     $result = $db->query($sql, [$uid, $privacy], 'ii')->fetchAll();
 
     foreach ($result as $row) {
-        $filename = $row['filename'];
-        $origname = $row['origname'];
-        $alttext = $row['alttext'];
-        $id = preg_replace('/[\#\:\.\ ]/', '', $origname) .'_'. $row['id'];
+        $id = preg_replace('/[\#\:\.\ ]/', '', $row['origname']) .'_'. $row['id'];
 
         // Kui pilt kasutaja lisatud, kuvab muutmise ja kustutamise nupud, muul juhul autori nime
         $name = $row['uid'] == $uid
                 ? '<button type="button" class="btn btn-outline-primary mx-1 btn-sm change" data-id="'
                     . $row['id'] .'" title="Muuda pildi sätted">Muuda</button>'
                     .'<button type="button" class="btn btn-outline-danger btn-sm mx-1 del" data-id="'
-                    . $row['id'] .'" data-title="'. $origname .'" title="Kustuta pilt">Kustuta</button>'
+                    . $row['id'] .'" data-title="'. $row['origname'] .'" title="Kustuta pilt">Kustuta</button>'
                 : '<h6>'. $row['fname'] .' '. $row['lname'] .'</h6>';
 
         $response .= "\n" .'<div class="card text-center m-2 img-card" id="'. $row['id'] .'">'
@@ -132,31 +129,24 @@ function getGallery($privacy) {
                 .'<a class="btn btn-outline-info py-2" href="#'. $id
                 .'" data-toggle="modal" title="Vaata suuremalt"><img class="img-thumbnail" src="'
                 . $row['thumb'] .'" alt="'. $row['alttext'] .'"></a><div class="container mt-2">'
-                // Pildi autor ja üleslaadimise kuupäev
+                // Pildi autor/nupud ja üleslaadimise kuupäev
                 . $name .'<p><small class="text-secondary">'. $row['created'] .'</small></p></div></div>';
 
-        $modal .= "
-    <div class=\"modal fade\" id=\"${id}\">
-        <div class=\"modal-dialog modal-dialog-centered modal-lg\">
-            <div class=\"modal-content\">
-                <div class=\"modal-header\">
-                    <h4 class=\"modal-title\">${origname}</h4>
-                    <button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button>
-                </div>
-                <div class=\"modal-body text-center\">
-                    <img class=\"rounded-lg\" src=\"picture.php?img=${filename}\">
-                    <h5 class=\"mt-2\">${alttext}</h5>
-                </div>
-                <div class=\"modal-footer\">
-                    <button type=\"button\" class=\"btn btn-danger\" data-dismiss=\"modal\">Sulge</button>
-                </div>
-            </div>
-        </div>
-    </div>
-";
+        $modal .= "\n" .'<div class="modal fade" id="'. $id .'">'
+                .'<div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">'
+                // Dialoogi päis faili originaalnimega
+                .'<div class="modal-header"><h4 class="modal-title">'. $row['origname']
+                .'</h4><button type="button" class="close" data-dismiss="modal">&times;</button></div>'
+                // Dialoogi keha pildi ja selle ALT tekstiga
+                .'<div class="modal-body text-center"><img class="rounded-lg" src="picture.php?img='
+                . $row['filename'] .'"><h5 class="mt-2">'. $row['alttext'] .'</h5></div>'
+                // Dialoogi jalus sulgemisnupuga
+                .'<div class="modal-footer">'
+                .'<button type="button" class="btn btn-danger" data-dismiss="modal">Sulge</button>'
+                .'</div></div></div></div>';
     }
 
-    return [$response, $modal];
+    return [$response, $modal ."\n"];
 }
 
 function getImageOwner($imgId) {
