@@ -7,6 +7,8 @@ require("Session.class.php");
 define("SESSION_NAME", 'vr20_'. SESSION_ID);
 define("SESSION_PATH", '/~juri.kormik/veebirakendused/');
 define("SESSION_DOMAIN", 'tigu.hk.tlu.ee');
+// Tabelinime eesliide
+define("TABLE_PREFIX", 'vr20__');
 
 
 // Mõned globaalsed muutujad

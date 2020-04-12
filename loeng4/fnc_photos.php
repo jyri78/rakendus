@@ -74,13 +74,12 @@ function createThumb($original, $type, $size) {
 }
 
 function saveImage($filename, $origname, $thumb, $alttext, $privacy) {
-    $sql = "INSERT INTO vr20_photos (userid, `filename`, origname, thumb, alttext, privacy) VALUES (";
     $params = [$_SESSION['userid'], $filename, $origname, $thumb, $alttext, $privacy];
-    
-    $db = new DB();
-    $val = $db->values($params);
 
-    $db->query($sql . $val .')', $params, 'issssi');
+    $db = (new DB())
+            ->insert('photos', ['userid', 'filename', 'origname', 'thumb', 'alttext', 'privacy'])
+            ->values($params)  // küsimärgid luuakse automaatselt
+            ->q($params, 'issssi');
 
     if ($db->affectedRows() != -1) {
         $notice = "OK";
@@ -100,29 +99,33 @@ function getGallery($privacy) {
     $response = null;
     $modal = null;
 
-    $sql = "SELECT vr20_photos.id AS id, vr20_photos.userid AS uid,
-                vr20_users.firstname AS fname, vr20_users.lastname AS lname,
-                vr20_photos.filename AS filename, vr20_photos.origname AS origname,
-                vr20_photos.thumb AS thumb, vr20_photos.created AS created,
-                vr20_photos.alttext AS alttext, vr20_photos.privacy AS privacy, vr20_photos.deleted AS deleted
-            FROM vr20_photos
-            INNER JOIN vr20_users ON vr20_photos.userid = vr20_users.id
-            WHERE deleted IS NULL AND (vr20_users.id=? OR privacy<?)
-            ORDER BY vr20_photos.id DESC";
-    
-    $db = new DB();
-    $result = $db->query($sql, [$uid, $privacy], 'ii')->fetchAll();
+    //$db = new DB();
+    // Ühekordsel tulemuse päringul ei ole objekti salvestamiseks vajadust;
+    // pealegi, kõik eelnevad SQL "konstruktorid" tagastavad viite objektile
+    $result = (new DB())
+            ->select(['photos.id', 'photos.userid', 'users.firstname', 'users.lastname'
+                    , 'photos.filename', 'photos.origname', 'photos.thumb', 'photos.created'
+                    , 'photos.alttext', 'photos.privacy', 'photos.deleted'])
+            ->from('photos')  // tabelinime eesliide lisatakse automaatselt
+            ->join('users')->on(['photos.userid', 'users.id'])
+            ->where()
+                ->isNull('deleted')
+                ->and(true)->eq(['users.id', '?'])  // and(true) - avab sulu
+                ->or()->lt(['privacy', '?'])        // lisab sulgeva sulu automaatselt
+            ->order(['photos.id', true])            // 'true' - sorteerib vastupidises suunas ehk 'DESC'
+            ->q([$uid, $privacy], 'ii')  // SQL päringu sooritamine, andes ette bind_param() argumendid
+            ->fetchAll();
 
     foreach ($result as $row) {
         $id = preg_replace('/[\#\:\.\ ]/', '', $row['origname']) .'_'. $row['id'];
 
         // Kui pilt kasutaja lisatud, kuvab muutmise ja kustutamise nupud, muul juhul autori nime
-        $name = $row['uid'] == $uid
+        $name = $row['userid'] == $uid
                 ? '<button type="button" class="btn btn-outline-primary mx-1 btn-sm change" data-id="'
                     . $row['id'] .'" title="Muuda pildi sätted">Muuda</button>'
                     .'<button type="button" class="btn btn-outline-danger btn-sm mx-1 del" data-id="'
                     . $row['id'] .'" data-title="'. $row['origname'] .'" title="Kustuta pilt">Kustuta</button>'
-                : '<h6>'. $row['fname'] .' '. $row['lname'] .'</h6>';
+                : '<h6>'. $row['firstname'] .' '. $row['lastname'] .'</h6>';
 
         $response .= "\n" .'<div class="card text-center m-2 img-card" id="'. $row['id'] .'">'
                 // Link pildiga
@@ -150,22 +153,24 @@ function getGallery($privacy) {
 }
 
 function getImageOwner($imgId) {
-    $result = null;
-    $sql = "SELECT id, userid FROM vr20_photos WHERE id=?";
+    $result = (new DB())
+            ->select(['id', 'userid'])
+            ->from('photos')
+            ->where()->eq(['id', '?'])
+            ->q($imgId, 'i')->fetch();
 
-    //~ Loob andmebaasiühenduse ja teostab SQL päringu
-    $db = new DB();
-    $result = $db->query($sql, $imgId, 'i')->fetch();
-    return $result['userid'];
+    return $result['userid'] ?? 0;
 }
 
 function deleteImage($id) {
     $ok = true;
-    $sql = "UPDATE vr20_photos SET deleted=NOW() WHERE id=?";
 
-    //~ Loob andmebaasiühenduse ja teostab SQL päringu
-    $db = new DB();
-    $db->query($sql, $id, 'i');
+    $db = (new DB())
+            ->update('photos')
+            ->set(['deleted', 'now()'])
+            ->where()->eq(['id', '?'])
+            ->q($id, 'i');
+
     if ($db->affectedRows() == -1) $ok = false;
 
     //~ Väljastab kas kustutamine läks korda või mitte
@@ -179,11 +184,16 @@ function deleteImage($id) {
 */
 function testImageName($name, $privacy) {
     $uid = $_SESSION['userid'] ?? 0;
-    $sql = "SELECT userid, filename, origname, privacy, deleted FROM vr20_photos
-            WHERE deleted IS NULL AND filename=? AND (userid=? OR privacy<?)";
-    
-    $db = new DB();
-    $result = $db->query($sql, [$name, $uid, $privacy], 'sii')->fetch();
+
+    $result = (new DB())
+            ->select(['userid', 'filename', 'origname', 'privacy', 'deleted'])
+            ->from('photos')
+            ->where()
+                ->isNull('deleted')
+                ->and()->eq(['filename', '?'])
+                ->and(true)->eq(['userid', '?'])  // lisab sulu
+                ->or()->lt(['privacy', '?'])      // sulgev sulg lisatakse automaatselt
+            ->q([$name, $uid, $privacy], 'sii')->fetch();
 
     if ($result) return true;
     return false;
@@ -195,22 +205,27 @@ function testImageName($name, $privacy) {
 */
 function getImageData($id) {
     $uid = $_SESSION['userid'] ?? 0;
-    $sql = "SELECT id, userid, filename, origname, privacy, thumb, alttext, deleted
-            FROM vr20_photos
-            WHERE deleted IS NULL AND id=? AND userid=?";
 
-    $db = new DB();
-    $result = $db->query($sql, [$id, $uid], 'ii')->fetch();
+    $result = (new DB())
+            ->select(['id', 'userid', 'filename', 'origname', 'privacy', 'thumb', 'alttext', 'deleted'])
+            ->from('photos')
+            ->where()
+                ->isNull('deleted')
+                ->and()->eq(['id', '?'])
+                ->and()->eq(['userid', '?'])
+            ->q([$id, $uid], 'ii')->fetch();
+
     return $result;
 }
 
 function changeImageData($id, $alttext, $privacy) {
     $ok = true;
-    $sql = "UPDATE vr20_photos SET alttext=?, privacy=? WHERE id=?";
 
-    //~ Loob andmebaasiühenduse ja teostab SQL päringu
-    $db = new DB();
-    $db->query($sql, [$alttext, $privacy, $id], 'sii');
+    $db = (new DB())
+            ->update('photos')
+            ->set([['alttext', '?'], ['privacy', '?']])
+            ->where()->eq(['id', '?'])
+            ->q([$alttext, $privacy, $id], 'sii');
 
     if ($db->affectedRows() == -1) $ok = false;
     return $ok;

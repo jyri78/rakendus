@@ -18,7 +18,7 @@ function _saveCA($field, $table, $value) {
     // Kuigi muutuja kasutamine otse päringus ei ole soovitatav, siis antud
     // juhul tegemist teises funktsioonis väljakutsutava funktsiooniga, kus
     // antakse ette väärtused (mitte kasutajalt!), siis erandina kasutab seda
-    $stmt = $conn->prepare("INSERT INTO vr20_study_${table} (${field}) VALUES (?)");
+    $stmt = $conn->prepare("INSERT INTO vr20__study_${table} (${field}) VALUES (?)");
     //echo $conn->error;
 
     //~ Seob päringuga tegelikud andmed
@@ -57,7 +57,7 @@ function _readCA($field, $table, $word, $outType) {
     //~ Loob andmebaasiühenduse ja valmistab ette SQL päringu
     $conn = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
     $conn->set_charset("utf8mb4");
-    $stmt = $conn->prepare("SELECT id, ${field} FROM vr20_study_${table} ORDER BY id");
+    $stmt = $conn->prepare("SELECT id, ${field} FROM vr20__study_${table} ORDER BY id");
     //echo $conn->error;
 
     $stmt->bind_result($idFromDB, $courseFromDB);
@@ -120,7 +120,7 @@ function saveStudy($course, $activity, $time) {
 
     //~ Valmistab ette SQL päringu
     $stmt = $conn->prepare(
-            "INSERT INTO vr20_studylog (course, activity, `time`) VALUES (?, ?, ?)"
+            "INSERT INTO vr20__studylog (course, activity, `time`) VALUES (?, ?, ?)"
         );
     //echo $conn->error;
 
@@ -153,13 +153,13 @@ function readStudy() {
     // Kuna kursused ja tegevused eraldi tabelites ja õppelogi tabelis võõrvõti,
     // siis tuleb id-väljad päringus vastavalt ühendada (käsuga INNER JOIN),
     // nüüd tuleb selekteerimisel lisada ette ka tabelinimi (eraldajaks punkt)
-    $stmt = $conn->prepare("SELECT vr20_studylog.time, vr20_studylog.day AS `day`,
-                                vr20_study_courses.course, vr20_study_activities.activity
-                            FROM vr20_studylog
-                            INNER JOIN vr20_study_courses
-                                ON vr20_studylog.course = vr20_study_courses.id
-                            INNER JOIN vr20_study_activities
-                                ON vr20_studylog.activity = vr20_study_activities.id
+    $stmt = $conn->prepare("SELECT vr20__studylog.time, vr20__studylog.day AS `day`,
+                                vr20__study_courses.course, vr20__study_activities.activity
+                            FROM vr20__studylog
+                            INNER JOIN vr20__study_courses
+                                ON vr20__studylog.course = vr20__study_courses.id
+                            INNER JOIN vr20__study_activities
+                                ON vr20__studylog.activity = vr20__study_activities.id
                             ORDER BY `day` DESC"
             );
     //echo $conn->error;

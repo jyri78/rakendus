@@ -4,7 +4,7 @@ function saveNews($newsTitle, $newsContent) {
     $userid = $_SESSION['userid'];  // Uudise lisaja ID
     $response = null;
     $errorMessage = null;
-    $sql = "INSERT INTO vr20_news (userid, title, content) VALUES (?, ?, ?)";
+    $sql = "INSERT INTO vr20__news (userid, title, content) VALUES (?, ?, ?)";
 
     //~ Loob andmebaasiühenduse ja teostab SQL päringu
     $db = new DB();
@@ -23,11 +23,12 @@ function saveNews($newsTitle, $newsContent) {
 
 function readNews($num, $limit) {
     $response = null;
-    $sql = "SELECT vr20_news.id AS id, vr20_news.title AS title, vr20_news.content AS content,
-                vr20_news.created AS created, vr20_news.deleted AS deleted,
-                vr20_users.firstname AS fname, vr20_users.lastname AS lname
-            FROM vr20_news
-            INNER JOIN vr20_users ON vr20_news.userid = vr20_users.id
+    $pr = TABLE_PREFIX;
+    $sql = "SELECT ${pr}news.id AS id, ${pr}news.title AS title, ${pr}news.content AS content,
+                ${pr}news.created AS created, ${pr}news.deleted AS deleted,
+                ${pr}users.firstname AS fname, ${pr}users.lastname AS lname
+            FROM ${pr}news
+            INNER JOIN ${pr}users ON ${pr}news.userid = ${pr}users.id
             WHERE deleted IS NULL
             ORDER BY created DESC LIMIT ?";
 
@@ -61,7 +62,7 @@ function readNews($num, $limit) {
 function deleteNews($id) {
     $ok = true;
     $response = null;
-    $sql = "UPDATE vr20_news SET deleted=NOW() WHERE id=?";
+    $sql = "UPDATE vr20__news SET deleted=NOW() WHERE id=?";
 
     //~ Loob andmebaasiühenduse ja teostab SQL päringu
     $db = new DB();

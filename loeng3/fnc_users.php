@@ -2,7 +2,7 @@
 
 function signUp($name, $surname, $email, $gender, $birthDate, $password) {
     $notice = null;
-    $sql = "INSERT INTO vr20_users (firstname, lastname, birthdate, gender, email, password) VALUES (";
+    $sql = "INSERT INTO vr20__users (firstname, lastname, birthdate, gender, email, password) VALUES (";
 
     /*$conn = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
     $stmt = $conn->prepare("INSERT INTO vr20_users (firstname, lastname, birthdate, gender, email, password)
@@ -21,7 +21,7 @@ function signUp($name, $surname, $email, $gender, $birthDate, $password) {
     //echo $db->error;
 
     //~ Esmalt kontroll, ega email juba ei ole ja kui on, siis tagastab veateate
-    if ($db->query("SELECT id FROM vr20_users WHERE email=?", [$email])->fetch()) {
+    if ($db->query("SELECT id FROM vr20__users WHERE email=?", [$email])->fetch()) {
         return "Sellise emailiga kasutajakonto on juba olemas!";
     }
 
@@ -46,7 +46,7 @@ function signUp($name, $surname, $email, $gender, $birthDate, $password) {
 
 function signIn($email, $password) {
     $notice = null;
-    $sql = "SELECT id, firstname, lastname, password FROM vr20_users WHERE email=?";
+    $sql = "SELECT id, firstname, lastname, password FROM vr20__users WHERE email=?";
 
     $db = new DB();
     echo $db->error;

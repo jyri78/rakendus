@@ -1,14 +1,12 @@
 <?php
-/* Mõned juhendid alustamiseks:
-
-https://websitebeaver.com/prepared-statements-in-php-mysqli-to-prevent-sql-injection
-https://coderwall.com/p/mx468a/simple-mysql-wrapper-using-mysqli_
-https://github.com/lodev09/php-mysqli-wrapper-class
-*/
 (@include "../../../.sql.php") or die("<b>Ei pääse andmebaasi!</b>");
 
 
 class DB {
+    private $_tblPrefix = null;
+    private $_sql = null;
+    private $_sqlCloseBr = false;
+
     private $_mysqli = null;
     private $_stmt = null;
     private $_stmtResult = null;
@@ -17,9 +15,10 @@ class DB {
     public $stmtError = null;
 
 
-    function __construct() {
-        //~ Kuigi klassil ei peaks otse andmed sisestama, siis kursuse raames teen erandi (andmete varjamiseks)
-        $this->_mysqli = new mysqli(SQL_HOST, SQL_USER, SQL_PWD, SQL_DB);
+    function __construct($host = SQL_HOST, $user = SQL_USER, $password = SQL_PWD
+                        , $database = SQL_DB, $table_prefix = TABLE_PREFIX) {
+        $this->_tblPrefix = $table_prefix;
+        $this->_mysqli = new mysqli($host, $user, $password, $database);
         $this->_mysqli->set_charset("utf8mb4");
         $this->error = $this->_mysqli->error;
     }
@@ -29,6 +28,9 @@ class DB {
     }
 
 
+    /* =========================================================================
+       Privaatsed abimeetodid
+    */
     private function _execute($values, $types) {
         if(!is_array($values)) $values = [$values]; //Convert scalar to array
         if(!$types) $types = str_repeat('s', count($values)); //String type for all variables if not specified
@@ -39,9 +41,87 @@ class DB {
         $this->stmtError = $this->_stmt->errno .' '. $this->_stmt->error;
     }
 
+    // Korrastab tabeli- ja/või veerunimed ning lisab sql-jutumärgid
+    private function _arrangeCols($cols): string {
+        if (!$cols) return '';
+        $result = [];
+        if (is_string($cols)) $cols = explode(',', $cols);
 
-    function values($inArr): string {
-        return implode(',', array_fill(0, count($inArr), '?')); //create question marks
+        if (strpos($cols[0], '.')===false) {  // lihtne, ainult veerunimedega loetelu
+            foreach ($cols as $col) {
+                $result[] = '`'. trim($col) .'`';
+            }
+        } else {  // keerulisem SQL päring erinevatest tabelitest
+            $cnt = [];
+            $rslt = [];
+
+            foreach ($cols as $col) {
+                $c = explode('.', $col);
+                $c[1] = trim($c[1]);
+                $r = $this->_tblCol($c) .' AS `'. $c[1];
+
+                // Kui veerunimi juba olemas, lisab numbri lõppu (al. 2-st)
+                if (in_array($c[1], $rslt)) {
+                    if (!isset($cnt[$c[1]])) $cnt[$c[1]] = 2;
+                    $r .= $cnt[$c[1]]++;
+                }
+                $r .= '` ';
+                $rslt[] = $c[1];  // jätab veerunime meelde, et vältida selle dubleerimist
+                $result[] = $r;
+            }
+        }
+        return implode(', ', $result);
+    }
+    private function _func($str): string {
+        $p = strpos($str, '(');  // TODO: Add multilevel support
+        return strtoupper(substr($str, 0, $p)) . substr($str, $p);
+    }
+    private function _tblCol($tc): string {
+        if (is_string($tc)) $tc = explode('.', $tc);
+        $tc[0] = trim($tc[0]);
+        if ($tc[0] == '?') return '?'; // pole mõtet jätkata
+        if (strpos($tc[0], '(') !== false) return $this->_func($tc[0]);  // funktsioon
+
+        if (!isset($tc[1])) $r = '`'. trim($tc[0]) .'`';
+        else $r = '`'. $this->_tblPrefix . trim($tc[0]) .'`.`'. trim($tc[1]) .'`';
+        return $r;
+    }
+    private function _equation($cols, $eq): string {
+        if (is_string($cols)) $cols = explode($eq, $cols);
+        return $this->_tblCol($cols[0]) .' '. $eq .' '. $this->_tblCol($cols[1]) . $this->_closeBr();
+    }
+    private function _closeBr(): string {
+        // TODO: Add multilevel support
+        $br = '';
+        if ($this->_sqlCloseBr) {
+            $br .= ')';
+            $this->_sqlCloseBr = false;
+        }
+        return $br;
+    }
+    // Abimeetod, mis väärtust ei tagasta
+    private function _join($table, $type) {
+        $jt = array('i'=>' INNER', 'l'=>' LEFT', 'r'=>'RIGHT', 'f'=>'FULL OUTER');
+        $on = [];
+        if (is_array($table)) {
+            $on = $table[1];
+            $table = $table[0];
+        }
+        if (is_string($on)) $on = explode('=', $on);
+        $this->_sql .= $jt[$type] .' JOIN `'. $this->_tblPrefix . trim($table) .'`';
+        if ($on) {
+            $this->_sql .= ' ON ';
+            $this->eq($on);
+        }
+
+    }
+
+
+    /* =========================================================================
+       Avalikud objektimeetodid
+    */
+    function valuesToQM($inArr): string {
+        return implode(', ', array_fill(0, count($inArr), '?')); //create question marks
     }
 
     function execute($values = [], $types = ''): self {
@@ -58,7 +138,7 @@ class DB {
         } else {
             if ($this->_stmt = $this->_mysqli->prepare($sql)) {
                $this->_execute($values, $types);
-        } else {  //kui viga SQL päringus
+            } else {  //kui viga SQL päringus
                 $this->error = $this->_mysqli->errno .' '. $this->_mysqli->error;
             }
             
@@ -67,6 +147,167 @@ class DB {
         return $this;
     }
 
+
+    /* =========================================================================
+       Abimeetodid SQL päringu konstrueerimiseks (LINQ stiilis)
+    */
+    // SQL päringu algused (kui midagi oli eelnevalt, asendab nüüd need uuega)
+    function select($cols = []): self {
+        $this->_sql = 'SELECT '. (!$cols ? '' : $this->_arrangeCols($cols));
+        return $this;
+    }
+    function insert($table, $cols = []): self {
+        $this->_sql = 'INSERT INTO `'. $this->_tblPrefix . trim($table) .'`';
+        if ($cols) $this->_sql .= ' ('. $this->_arrangeCols($cols) .')';
+        return $this;
+    }
+    function update($table): self {
+        $this->_sql = 'UPDATE `'. $this->_tblPrefix . trim($table) .'`';
+        return $this;
+    }
+
+    // Päringu täpsustused, tabeli valimine jms
+    function distinct($cols = ''): self {
+        $this->_sql .= ' DISTINCT '. $this->_arrangeCols($cols);
+        return $this;
+    }
+    function from($table): self {
+        if (substr($this->_sql, -2) == 'T ') $this->_sql .= '*';
+        $this->_sql .= ' FROM `'. $this->_tblPrefix . trim($table) .'`';
+        return $this;
+    }
+    function values($values): self {
+        if (is_string($values)) $values = explode(',', $values);
+        $this->_sql .= ' VALUES ('. $this->valuesToQM($values) .')';
+        return $this;
+    }
+    function set($options): self {
+        if (is_string($options)) $options = explode(',', $options);
+        $this->_sql .= ' SET';
+
+        if (is_array($options[0])) {
+            $r = [];
+            foreach ($options as $opt) {
+                if (is_string($opt)) $opt = explode('=', $opt);
+                $r[] = $this->_equation($opt, '=');
+            }
+            $this->_sql .= ' '. implode(', ', $r);
+        } else {
+            $this->eq($options);
+        }
+        return $this;
+    }
+
+    // Päringud mitmest erinevast tabelist
+    function join($table, $on = null): self {
+        if ($on) $table = [$table, $on];
+        $this->_join($table, 'i');
+        return $this;
+    }
+    function innerJoin($table, $on = null): self {
+        if ($on) $table = [$table, $on];
+        $this->_join($table, 'i');
+        return $this;
+    }
+    function leftJoin($table, $on = null): self {
+        if ($on) $table = [$table, $on];
+        $this->_join($table, 'l');
+        return $this;
+    }
+    function rightJoin($table, $on = null): self {
+        if ($on) $table = [$table, $on];
+        $this->_join($table, 'r');
+        return $this;
+    }
+    function fullJoin($table, $on = null): self {
+        if ($on) $table = [$table, $on];
+        $this->_join($table, 'f');
+        return $this;
+    }
+    function on($on1, $on2 = null): self {
+        if ($on2) $on1 = [$on1, $on2];
+        $this->_sql .= ' ON ';
+        $this->eq($on1);
+        return $this;
+    }
+
+    // Päringu tingimused (tühjad funktsioonid)
+    function where(): self {
+        $this->_sql .= ' WHERE';
+        return $this;
+    }
+    function not(): self {
+        $this->_sql .= ' NOT';
+        return $this;
+    }
+    function and($openBracket = false): self {
+        $this->_sql .= ' AND';
+        if ($openBracket) $this->_sql .= ' (';  // TODO: Add multilevel support
+        return $this;
+    }
+    function or($closeBracket = null): self {
+        $this->_sql .= ' OR';
+        $this->_sqlCloseBr = $closeBracket ?? true;
+        return $this;
+    }
+
+    // Päringu võrdlus-tehted
+    function isNull($col): self {
+        $this->_sql .= ' '. $this->_tblCol($col) .' IS NULL' . $this->_closeBr();
+        return $this;
+    }
+    function notNull($col): self {
+        $this->_sql .= ' '. $this->_tblCol($col) .' IS NOT NULL' . $this->_closeBr();
+        return $this;
+    }
+    function eq($col1, $col2 = null): self {
+        if ($col2) $col1 = [$col1, $col2];
+        $this->_sql .= ' '. $this->_equation($col1, '=');
+        return $this;
+    }
+    function ne($col1, $col2 = null): self {
+        if ($col2) $col1 = [$col1, $col2];
+        $this->_sql .= ' '. $this->_equation($col1, '<>');
+        return $this;
+    }
+    function lt($col1, $col2 = null): self {
+        if ($col2) $col1 = [$col1, $col2];
+        $this->_sql .= ' '. $this->_equation($col1, '<');
+        return $this;
+    }
+    function gt($col1, $col2 = null): self {
+        if ($col2) $col1 = [$col1, $col2];
+        $this->_sql .= ' '. $this->_equation($col1, '>');
+        return $this;
+    }
+
+    // Päringu tulemuste sorteerimine
+    function order($cond): self {
+        if (is_string($cond)) $cond = [[$cond, false]];  // vaikimisi ASC
+        if (!is_array($cond[0])) $cond = [$cond];
+        $r = [];
+        foreach ($cond as $con) {
+            $desc = $con[1] ?? false;
+            $r[] = $this->_tblCol($con[0]) . ($desc ? ' DESC' : ' ASC');
+        }
+        $this->_sql .= ' ORDER BY '. implode(', ', $r);
+        return $this;
+    }
+
+    // Lõpuks teostab SQL päringu
+    function q($values = [], $types = '') {
+        return $this->query($this->_sql, $values, $types);
+    }
+
+    // Tagastab SQL stringi (kui tekib vajadus)
+    function sql(): string {
+        return $this->_sql;
+    }
+
+
+    /* =========================================================================
+       Meetodid tulemuse väljastamiseks
+    */
     function numRows(): int {
         return $this->_stmtResult->num_rows;
     }
@@ -76,6 +317,7 @@ class DB {
     function insertId(): int {
         return $this->_mysqli->insert_id;
     }
+
 
     function fetch ($fetchType = 'assoc', $className = 'stdClass', $classParams = []) {
         $row = [];
@@ -134,6 +376,7 @@ class DB {
 
         return $arr;
     }
+
 
     function close(): self {
         if ($this->_stmtResult) $this->_stmtResult->free();

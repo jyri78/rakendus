@@ -7,7 +7,7 @@
 function _saveCA($field, $table, $value) {
     $response = null;
     $errorMessage = null;
-    $sql = "INSERT INTO vr20_study_${table} (${field}) VALUES (?)";
+    $sql = "INSERT INTO vr20__study_${table} (${field}) VALUES (?)";
 
     //~ Loob andmebaasiühenduse ja teostab SQL päringu
     $db = new DB();
@@ -38,7 +38,7 @@ function _readCA($field, $table, $word, $outType) {
     }
 
     $response = null;
-    $sql = "SELECT id, ${field} FROM vr20_study_${table} ORDER BY id";
+    $sql = "SELECT id, ${field} FROM vr20__study_${table} ORDER BY id";
 
     //~ Loob andmebaasiühenduse ja teostab SQL päringu
     $db = new DB();
@@ -83,7 +83,7 @@ function readActivities($outType = 'option') {
 function saveStudy($course, $activity, $time) {
     $response = null;
     $errorMessage = null;
-    $sql = "INSERT INTO vr20_studylog (course, activity, `time`, userid) VALUES (?, ?, ?, ?)";
+    $sql = "INSERT INTO vr20__studylog (course, activity, `time`, userid) VALUES (?, ?, ?, ?)";
 
     //~ Loob andmebaasiühenduse ja teeb SQL päringu
     $db = new DB();
@@ -103,16 +103,17 @@ function saveStudy($course, $activity, $time) {
 
 function readStudy() {
     $response = null;
+    $pr = TABLE_PREFIX;
 
     // Kuna kursused ja tegevused eraldi tabelites ja õppelogi tabelis võõrvõti,
     // siis tuleb id-väljad päringus vastavalt ühendada (käsuga INNER JOIN),
     // nüüd tuleb selekteerimisel lisada ette ka tabelinimi (eraldajaks punkt)
-    $sql = "SELECT vr20_studylog.time AS `time`, vr20_studylog.day AS `day`, vr20_studylog.userid AS `uid`,
-                vr20_study_courses.course AS course, vr20_study_activities.activity AS activity
-            FROM vr20_studylog
-            INNER JOIN vr20_study_courses ON vr20_studylog.course = vr20_study_courses.id
-            INNER JOIN vr20_study_activities ON vr20_studylog.activity = vr20_study_activities.id
-            WHERE vr20_studylog.userid = ?
+    $sql = "SELECT ${pr}studylog.time AS `time`, ${pr}studylog.day AS `day`, ${pr}studylog.userid AS `uid`,
+                ${pr}study_courses.course AS course, ${pr}study_activities.activity AS activity
+            FROM ${pr}studylog
+            INNER JOIN ${pr}study_courses ON ${pr}studylog.course = ${pr}study_courses.id
+            INNER JOIN ${pr}study_activities ON ${pr}studylog.activity = ${pr}study_activities.id
+            WHERE ${pr}studylog.userid = ?
             ORDER BY `day` DESC";
 
     //~ Loob andmebaasiühenduse ja teostab SQL päringu
