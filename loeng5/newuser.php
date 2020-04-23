@@ -120,7 +120,9 @@ if (isset($_SESSION['userid'])) {
 
 	
 	//Kui kõik on korras, salvestame
-	if(empty($nameError) and empty($surnameError) and empty($birthMonthError) and empty($birthYearError) and empty($birthDayError)and empty($birthDateError) and empty($genderError) and empty($emailError) and empty($passwordError) and empty($confirmpasswordError)){
+    if(empty($nameError) && empty($surnameError) && empty($birthMonthError) && empty($birthYearError)
+                && empty($birthDayError) && empty($birthDateError) && empty($genderError)
+                && empty($emailError) && empty($passwordError) && empty($confirmpasswordError)){
 		$notice = User::signUp($name, $surname, $email, $gender, $birthDate, $_POST["password"]);
 	}//kui kõik korras
 	
