@@ -15,7 +15,6 @@ if (!isset($_SESSION["userid"])) {
 
 $error = null;
 $success = null;
-//$imageFileType = null;
 
 
 if (isset($_POST['photoSubmit']) && !empty($_FILES['fileToUpload']['tmp_name'])) {
@@ -27,69 +26,24 @@ if (isset($_POST['photoSubmit']) && !empty($_FILES['fileToUpload']['tmp_name']))
 
     $photoUp = new Photo($_FILES['fileToUpload'], $addWM);
 
-    // Kas üldse pilt?
-    //$check = getimagesize($_FILES['fileToUpload']['tmp_name']);
-
-    //if ($check !== false) {
     if (!$photoUp->getImageFileType()) {
-        // Failitüübi ja sobivuse kontroll
-        /*if ($check['mime'] == 'image/jpeg') {
-            $imageFileType = 'jpeg';
-        } elseif ($check['mime'] == 'image/png') {
-            $imageFileType = 'png';
-        } else {*/
         if ($photoUp->getImageFileType() === false)
             $error = 'Ainult JPG ja PNG pildid on lubatud!';
         else
             $error = "Valitud fail ei ole pilt!";
     }
 
-    //if ($_FILES['fileToUpload']['size'] > $fileUploadSizeLimit) {
     if ($photoUp->getImageSize() > $fileUploadSizeLimit) {
         $error .= ' Valitud fail on liiga suur';
     }
 
-    // Loob oma nime failile
-    /*$timestamp = microtime(1) * 10000;
-    $fileName = $fileNamePrefix . $timestamp .'.'. $imageFileType;
-
-    //$originalTarget = $originalPhotoDir . $_FILES['fileToUpload']['name'];
-    $originalTarget = $originalPhotoDir . $fileName;*/
-
     // Kui vigu pole
     if (!$error) {
-        /*$photoUp = new Photo($_FILES['fileToUpload'], $imageFileType);
-
-        //$myNewImage = createNewImage($imageFileType, $imageMaxWidth, $imageMaxHeight);
-        $photoUp->resizePhoto($imageMaxWidth, $imageMaxHeight);
-
-        // Lisab vesimärgi
-        $photoUp->addWatermark('../inc/vr_watermark.png', 3, 20);
-
-        // Salvestab vähendatud kujutise faili
-        /*if ($imageFileType == 'jpeg') {
-            if (imagejpeg($myNewImage, $normalPhotoDir . $fileName, 90)) {
-                $success = 'Vähendatud pilt laeti üles.';
-            } else {
-                $error = 'Vähendatud pildi salvestamisel tekkis viga!';
-            }
-        } elseif ($imageFileType == 'png') {
-            if (imagepng($myNewImage, $normalPhotoDir . $fileName, 90)) {
-                $success = 'Vähendatud pilt laeti üles.';
-            } else {
-                $error = 'Vähendatud pildi salvestamisel tekkis viga!';
-            }
-        }*/
-
-        //$result = saveImgToFile($photoUp->getNewImage(), $normalPhotoDir . $fileName, $imageFileType);
-        //$result = $photoUp->saveImgToFile($normalPhotoDir . $fileName);
         if ($photoUp->createAndSaveNormalPhoto() == 1) {
             $success = 'Vähendatud pilt laeti üles.';
         } else {
             $error = 'Vähendatud pildi salvestamisel tekkis viga!';
         }
-
-        //unset($photoUp);
 
         if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], $photoUp->getOriginalTarget())) {
             $success .= ' Originaalpilt laeti üles.';
@@ -100,9 +54,7 @@ if (isset($_POST['photoSubmit']) && !empty($_FILES['fileToUpload']['tmp_name']))
         // Salvestab nüüd andmebaasi
         $altText = test_input($_POST['altText'] ?? 'PILT');
         $privacy = test_input($_POST['privacy'] ?? 3);
-        //$thumb = createThumb($originalTarget, $imageFileType, $imageThumbSize);
 
-        //$save = saveImage($fileName, $_FILES['fileToUpload']['name'], $thumb, $altText, $privacy);
         $save = $photoUp->saveImageData($altText, $privacy);
 
         if ($save == 'OK') {
