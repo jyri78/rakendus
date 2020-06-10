@@ -14,6 +14,8 @@ class Exif {
         if (isset($info['APP13'])) $exif['IPTC'] = iptcparse($info['APP13']);
         var_dump($exif);*/
 
+        if (!$exif) return false;
+
         foreach ($exif as $key => $section) {
             foreach ($section as $name => $value) {
                 if (array_key_exists($name, $ut)) $name = $ut[$name];  // Parandab vajadusel nime

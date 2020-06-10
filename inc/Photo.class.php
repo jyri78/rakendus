@@ -253,6 +253,7 @@ class Photo {
         );
         $sel = ($isOwner ? 'owner' : 'user');
         $exif = Exif::getExifData($targetImage);
+        $ret = null;
 
         if ($exif) {
             foreach ($exif as $key => $section) {
@@ -340,10 +341,12 @@ class Photo {
                         .'</h4><button type="button" class="close" data-dismiss="modal">&times;</button></div>'
                         // Dialoogi keha EXIF infoga
                         .'<div class="modal-body"><ul class="list-group">'. "\n";
-                foreach ($exif as $key => $section) {
-                    foreach ($section as $name => $val) {
-                        $modalE .= '<li class="list-group-item"><b>'. $key .'</b>.'. $name
-                                .' &nbsp; <span class="badge badge-info badge-pill">'. $val .'</span></li>';
+                if ($exif) {
+                    foreach ($exif as $key => $section) {
+                        foreach ($section as $name => $val) {
+                            $modalE .= '<li class="list-group-item"><b>'. $key .'</b>.'. $name
+                                    .' &nbsp; <span class="badge badge-info badge-pill">'. $val .'</span></li>';
+                        }
                     }
                 }
                 $modalE .= "\n" .'</ul></div>'
@@ -448,10 +451,12 @@ class Photo {
                         .'</h4><button type="button" class="close" data-dismiss="modal">&times;</button></div>'
                         // Dialoogi keha EXIF infoga
                         .'<div class="modal-body"><ul class="list-group">'. "\n";
-                foreach ($exif as $key => $section) {
-                    foreach ($section as $name => $val) {
-                        $modalE .= '<li class="list-group-item"><b>'. $key .'</b>.'. $name
-                                .' &nbsp; <span class="badge badge-info badge-pill">'. $val .'</span></li>';
+                if ($exif) {
+                    foreach ($exif as $key => $section) {
+                        foreach ($section as $name => $val) {
+                            $modalE .= '<li class="list-group-item"><b>'. $key .'</b>.'. $name
+                                    .' &nbsp; <span class="badge badge-info badge-pill">'. $val .'</span></li>';
+                        }
                     }
                 }
                 $modalE .= "\n" .'</ul></div>'
