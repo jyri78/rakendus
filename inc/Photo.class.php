@@ -19,6 +19,50 @@ class Photo {
     private $myNewImage;
 
 
+    private static $icons = [
+        // Info ikoonike (EXIF-i kuvamiseks)
+        '<svg class="bi bi-info-circle" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"'
+                .' xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000'
+                .' 14zm0 1A8 8 0 108 0a8 8 0 000 16z" clip-rule="evenodd"/><path d="M8.93 6.588l-2.29.287'
+                .'-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0'
+                .' 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93'
+                .' 6.588z"/><circle cx="8" cy="4.5" r="1"/></svg>',
+        // Avalik pilt
+        '<svg class="bi bi-people-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"'
+                .' xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7 14s-1 0-1-1 1-4 5-4 5 3'
+                .' 5 4-1 1-1 1H7zm4-6a3 3 0 100-6 3 3 0 000 6zm-5.784 6A2.238 2.238 0 015 13c0-1.355.68-2.75'
+                .' 1.936-3.72A6.325 6.325 0 005 9c-4 0-5 3-5 4s1 1 1 1h4.216zM4.5 8a2.5 2.5 0 100-5 2.5 2.5 0'
+                .' 000 5z" clip-rule="evenodd"/></svg>',
+        // Ainult kasutajale pilt
+        '<svg class="bi bi-person-check-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"'
+                .' xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M1 14s-1 0-1-1 1-4 6-4 6 3 6'
+                .' 4-1 1-1 1H1zm5-6a3 3 0 100-6 3 3 0 000 6zm9.854-2.854a.5.5 0 010 .708l-3 3a.5.5 0 01-.708'
+                .' 0l-1.5-1.5a.5.5 0 01.708-.708L12.5 7.793l2.646-2.647a.5.5 0 01.708 0z" clip-rule="evenodd"/></svg>',
+        // Privaatne pilt
+        '<svg class="bi bi-lock-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"'
+                .' xmlns="http://www.w3.org/2000/svg"><rect width="11" height="9" x="2.5" y="7" rx="2"/><path'
+                .' fill-rule="evenodd" d="M4.5 4a3.5 3.5 0 117 0v3h-1V4a2.5 2.5 0 00-5 0v3h-1V4z"'
+                .' clip-rule="evenodd"/></svg>',
+        // Teiste poolt avalikuks tehtud pildid
+        '<svg class="bi bi-people" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"'
+                .' xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M15 14s1 0 1-1-1-4-5-4-5 3-5'
+                .' 4 1 1 1 1h8zm-7.995-.944v-.002.002zM7.022 13h7.956a.274.274 0 00.014-.002l.008-.002c-.002-.264'
+                .'-.167-1.03-.76-1.72C13.688 10.629 12.718 10 11 10c-1.717 0-2.687.63-3.24 1.276-.593.69-.759'
+                .' 1.457-.76 1.72a1.05 1.05 0 00.022.004zm7.973.056v-.002.002zM11 7a2 2 0 100-4 2 2 0 000 4zm3-2a3'
+                .' 3 0 11-6 0 3 3 0 016 0zM6.936 9.28a5.88 5.88 0 00-1.23-.247A7.35 7.35 0 005 9c-4 0-5 3-5 4 0'
+                .' .667.333 1 1 1h4.216A2.238 2.238 0 015 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846'
+                .'-.816zM4.92 10c-1.668.02-2.615.64-3.16 1.276C1.163 11.97 1 12.739 1 13h3c0-1.045.323-2.086.92'
+                .'-3zM1.5 5.5a3 3 0 116 0 3 3 0 01-6 0zm3-2a2 2 0 100 4 2 2 0 000-4z" clip-rule="evenodd"/></svg>',
+        // Teiste poolt sisseloginud kasutajatele mõeldud pildid
+        '<svg class="bi bi-person" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"'
+                .' xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M13 14s1 0 1-1-1-4-6-4-6 3-6'
+                .' 4 1 1 1 1h10zm-9.995-.944v-.002.002zM3.022 13h9.956a.274.274 0 00.014-.002l.008-.002c-.001'
+                .'-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678'
+                .'-.83 1.418-.832 1.664a1.05 1.05 0 00.022.004zm9.974.056v-.002.002zM8 7a2 2 0 100-4 2 2 0 000'
+                .' 4zm3-2a3 3 0 11-6 0 3 3 0 016 0z" clip-rule="evenodd"/></svg>'
+    ];
+
+
 
 
     /* =========================================================================================
@@ -220,53 +264,12 @@ class Photo {
         }
         return (!$ret ? false : $ret );
     }
+
     public static function getGallery($privacy) {
         $uid = $_SESSION['userid'] ?? 0;
         $response = null;
         $modal = null;
         $modalE = null;
-        $icons = [
-            // Info ikoonike (EXIF-i kuvamiseks)
-            '<svg class="bi bi-info-circle" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"'
-                    .' xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000'
-                    .' 14zm0 1A8 8 0 108 0a8 8 0 000 16z" clip-rule="evenodd"/><path d="M8.93 6.588l-2.29.287'
-                    .'-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0'
-                    .' 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93'
-                    .' 6.588z"/><circle cx="8" cy="4.5" r="1"/></svg>',
-            // Avalik pilt
-            '<svg class="bi bi-people-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"'
-                    .' xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7 14s-1 0-1-1 1-4 5-4 5 3'
-                    .' 5 4-1 1-1 1H7zm4-6a3 3 0 100-6 3 3 0 000 6zm-5.784 6A2.238 2.238 0 015 13c0-1.355.68-2.75'
-                    .' 1.936-3.72A6.325 6.325 0 005 9c-4 0-5 3-5 4s1 1 1 1h4.216zM4.5 8a2.5 2.5 0 100-5 2.5 2.5 0'
-                    .' 000 5z" clip-rule="evenodd"/></svg>',
-            // Ainult kasutajale pilt
-            '<svg class="bi bi-person-check-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"'
-                    .' xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M1 14s-1 0-1-1 1-4 6-4 6 3 6'
-                    .' 4-1 1-1 1H1zm5-6a3 3 0 100-6 3 3 0 000 6zm9.854-2.854a.5.5 0 010 .708l-3 3a.5.5 0 01-.708'
-                    .' 0l-1.5-1.5a.5.5 0 01.708-.708L12.5 7.793l2.646-2.647a.5.5 0 01.708 0z" clip-rule="evenodd"/></svg>',
-            // Privaatne pilt
-            '<svg class="bi bi-lock-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"'
-                    .' xmlns="http://www.w3.org/2000/svg"><rect width="11" height="9" x="2.5" y="7" rx="2"/><path'
-                    .' fill-rule="evenodd" d="M4.5 4a3.5 3.5 0 117 0v3h-1V4a2.5 2.5 0 00-5 0v3h-1V4z"'
-                    .' clip-rule="evenodd"/></svg>',
-            // Teiste poolt avalikuks tehtud pildid
-            '<svg class="bi bi-people" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"'
-                    .' xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M15 14s1 0 1-1-1-4-5-4-5 3-5'
-                    .' 4 1 1 1 1h8zm-7.995-.944v-.002.002zM7.022 13h7.956a.274.274 0 00.014-.002l.008-.002c-.002-.264'
-                    .'-.167-1.03-.76-1.72C13.688 10.629 12.718 10 11 10c-1.717 0-2.687.63-3.24 1.276-.593.69-.759'
-                    .' 1.457-.76 1.72a1.05 1.05 0 00.022.004zm7.973.056v-.002.002zM11 7a2 2 0 100-4 2 2 0 000 4zm3-2a3'
-                    .' 3 0 11-6 0 3 3 0 016 0zM6.936 9.28a5.88 5.88 0 00-1.23-.247A7.35 7.35 0 005 9c-4 0-5 3-5 4 0'
-                    .' .667.333 1 1 1h4.216A2.238 2.238 0 015 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846'
-                    .'-.816zM4.92 10c-1.668.02-2.615.64-3.16 1.276C1.163 11.97 1 12.739 1 13h3c0-1.045.323-2.086.92'
-                    .'-3zM1.5 5.5a3 3 0 116 0 3 3 0 01-6 0zm3-2a2 2 0 100 4 2 2 0 000-4z" clip-rule="evenodd"/></svg>',
-            // Teiste poolt sisseloginud kasutajatele mõeldud pildid
-            '<svg class="bi bi-person" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"'
-                    .' xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M13 14s1 0 1-1-1-4-6-4-6 3-6'
-                    .' 4 1 1 1 1h10zm-9.995-.944v-.002.002zM3.022 13h9.956a.274.274 0 00.014-.002l.008-.002c-.001'
-                    .'-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678'
-                    .'-.83 1.418-.832 1.664a1.05 1.05 0 00.022.004zm9.974.056v-.002.002zM8 7a2 2 0 100-4 2 2 0 000'
-                    .' 4zm3-2a3 3 0 11-6 0 3 3 0 016 0z" clip-rule="evenodd"/></svg>'
-        ];
 
         //$db = new DB();
         // Ühekordsel tulemuse päringul ei ole objekti salvestamiseks vajadust;
@@ -295,7 +298,7 @@ class Photo {
             if ($uid) {
                 $i = $row['privacy'];  // valib esmalt ikooni indeksi privaatsuse järgi
                 if ($row['userid'] != $uid) $i += 3;  // muul juhul ainult kasutajale mõeldud ikooni lisamine
-                $icn = '<h3 class="card-img-overlay text-info" style="opacity:.7">'. $icons[$i] .'</h3>';
+                $icn = '<h3 class="card-img-overlay text-info" style="opacity:.7">'. self::$icons[$i] .'</h3>';
             }
 
             // Kui pilt kasutaja lisatud, kuvab muutmise ja kustutamise nupud, muul juhul autori nime
@@ -313,7 +316,7 @@ class Photo {
                     . $row['alttext'] .'">'. $icn .'</div></a><div class="container mt-2">'
                     // Pildi autor/nupud ja üleslaadimise kuupäev (EXIF olemasolul info ikoonike)
                     . $name .'<p><small class="text-secondary">'. ( !$bI ? '' :
-                            '<a class="mr-2" href="#'. $id .'e" data-toggle="modal" title="info">'. $icons[0] .'</a>')
+                            '<a class="mr-2" href="#'. $id .'e" data-toggle="modal" title="info">'. self::$icons[0] .'</a>')
                     . $row['created'] .'</small></p></div></div>';
 
             $modal .= "\n" .'<div class="modal fade" id="'. $id .'">'
@@ -329,24 +332,134 @@ class Photo {
                     .'<button type="button" class="btn btn-danger" data-dismiss="modal">Sulge</button>'
                     .'</div></div></div></div>';
             
-            $modalE .= "\n" .'<div class="modal fade" id="'. $id .'e">'
-                    .'<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal"><div class="modal-content">'
-                    // Dialoogi päis faili originaalnimega
-                    .'<div class="modal-header"><h4 class="modal-title">'. $row['origname']
-                    .'</h4><button type="button" class="close" data-dismiss="modal">&times;</button></div>'
-                    // Dialoogi keha EXIF infoga
-                    .'<div class="modal-body"><ul class="list-group">'. "\n";
-            foreach ($exif as $key => $section) {
-                foreach ($section as $name => $val) {
-                    $modalE .= '<li class="list-group-item"><b>'. $key .'</b>.'. $name
-                            .' &nbsp; <span class="badge badge-info badge-pill">'. $val .'</span></li>';
+            if ($uid) {
+                $modalE .= "\n" .'<div class="modal fade" id="'. $id .'e">'
+                        .'<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal"><div class="modal-content">'
+                        // Dialoogi päis faili originaalnimega
+                        .'<div class="modal-header"><h4 class="modal-title">'. $row['origname']
+                        .'</h4><button type="button" class="close" data-dismiss="modal">&times;</button></div>'
+                        // Dialoogi keha EXIF infoga
+                        .'<div class="modal-body"><ul class="list-group">'. "\n";
+                foreach ($exif as $key => $section) {
+                    foreach ($section as $name => $val) {
+                        $modalE .= '<li class="list-group-item"><b>'. $key .'</b>.'. $name
+                                .' &nbsp; <span class="badge badge-info badge-pill">'. $val .'</span></li>';
+                    }
                 }
+                $modalE .= "\n" .'</ul></div>'
+                        // Dialoogi jalus sulgemisnupuga
+                        .'<div class="modal-footer">'
+                        .'<button type="button" class="btn btn-danger" data-dismiss="modal">Sulge</button>'
+                        .'</div></div></div></div>';
             }
-            $modalE .= "\n" .'</ul></div>'
-                    // Dialoogi jalus sulgemisnupuga
-                    .'<div class="modal-footer">'
-                    .'<button type="button" class="btn btn-danger" data-dismiss="modal">Sulge</button>'
-                    .'</div></div></div></div>';
+        }
+
+        return [$response, $modal ."\n", $modalE ."\n"];
+    }
+
+    // Uuendatud galerii klassimeetod 6. loengu tarvis (lisatud hindamine, fotode vaatamiseks üks modaalaken)
+    public static function getGalleryNew($privacy, $page = 0, $limit = 10) {
+        $uid = $_SESSION['userid'] ?? 0;
+        $response = null;
+        $modal = "\n" .'<div class="modal fade" id="photoModal">'
+                .'<div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">'
+                // Dialoogi päis faili originaalnimega
+                .'<div class="modal-header"><h4 class="modal-title">#</h4>'
+                .'<button type="button" class="close" data-dismiss="modal">&times;</button></div>'
+                // Dialoogi keha pildi ja selle ALT tekstiga
+                .'<div class="modal-body text-center"><img class="rounded-lg" src="#"><h5 class="mt-2"></h5>'
+                // Foto hindamine
+                .'<div class="card mt-4 px-3 py-2"><div class="row">';
+        if ($uid) {  // avalikku hindamist ei luba
+            for ($i = 1; $i < 6; $i++) 
+                $modal .= '<div class="col-1 my-1"><div class="custom-control custom-radio custom-control-inline">'
+                        .'<input type="radio" class="custom-control-input" id="rate'. $i .'" name="rate" value="'. $i .'">'
+                        .'<label class="custom-control-label" for="rate'. $i .'">'. $i .'</label></div></div>';
+            $modal .= '<div class="col-2"><button id="btnRate" class="btn btn-outline-light btn-block" disabled>Hinda</button></div>';
+                //.'</div><hr><div class="row">';
+        }
+        $modal .= '<div class="col-5 my-1"><strong>Keskmine hinne:</strong> &nbsp; <label id="avgRate">0</label>'
+                .'</div></div></div></div>'
+                // Dialoogi jalus sulgemisnupuga
+                .'<div class="modal-footer">'
+                .'<button type="button" class="btn btn-danger" data-dismiss="modal">Sulge</button>'
+                .'</div></div></div></div>';
+        $modalE = null;
+        
+
+        //$db = new DB();
+        // Ühekordsel tulemuse päringul ei ole objekti salvestamiseks vajadust;
+        // pealegi, kõik eelnevad SQL "konstruktorid" tagastavad viite objektile
+        $result = (new DB())
+                ->select(['photos.id', 'photos.userid', 'users.firstname', 'users.lastname'
+                        , 'photos.filename', 'photos.origname', 'photos.thumb', 'photos.created'
+                        , 'photos.alttext', 'photos.privacy', 'photos.deleted'])
+                ->from('photos')  // tabelinime eesliide lisatakse automaatselt
+                ->join('users')->on(['photos.userid', 'users.id'])
+                ->where()
+                    ->isNull('deleted')
+                    ->and(true)->eq(['users.id', '?'])  // and(true) - avab sulu
+                    ->or()->lt(['privacy', '?'])        // lisab sulgeva sulu automaatselt
+                ->order(['photos.id', true])            // 'true' - sorteerib vastupidises suunas ehk 'DESC'
+                ->limit(true)                           // 'true' - lisab teise ?-märgi (näit "pagination")
+                ->q([$uid, $privacy, $page, $limit], 'iiii')  // SQL päringu sooritamine, andes ette bind_param() argumendid
+                ->fetchAll();
+
+        foreach ($result as $row) {
+            $id = preg_replace('/[\#\:\.\ ]/', '', $row['origname']) .'_'. $row['id'];
+            $exif = self::_getExifData(IMG_ORIGINAL_PHOTO_DIR . $row['filename'], $row['userid']==$uid);
+            $bI = $uid && $exif !== false;
+            $icn = '';
+            $ratings = Photo::getImageRatings($row['id']);
+
+            //* Kui Sisseloginud kasutaja
+            if ($uid) {
+                $i = $row['privacy'];  // valib esmalt ikooni indeksi privaatsuse järgi
+                if ($row['userid'] != $uid) $i += 3;  // muul juhul ainult kasutajale mõeldud ikooni lisamine
+                $icn = '<h3 class="card-img-overlay text-info" style="opacity:.7">'. self::$icons[$i] .'</h3>';
+            }
+
+            // Kui pilt kasutaja lisatud, kuvab muutmise ja kustutamise nupud, muul juhul autori nime
+            $name = $row['userid'] == $uid
+                    ? '<button type="button" class="btn btn-outline-primary mx-1 btn-sm change" data-id="'
+                        . $row['id'] .'" title="Muuda pildi sätted">Muuda</button>'
+                        .'<button type="button" class="btn btn-outline-danger btn-sm mx-1 del" data-id="'
+                        . $row['id'] .'" data-title="'. $row['origname'] .'" title="Kustuta pilt">Kustuta</button>'
+                    : '<h6>'. $row['firstname'] .' '. $row['lastname'] .'</h6>';
+
+            $response .= "\n" .'<div class="card text-center m-2 img-card" id="'. $row['id'] .'">'
+                    // Link pildiga (ja ikoon pildi kohal)
+                    .'<a class="btn btn-outline-info py-2" href="#photoModal" data-toggle="modal" '
+                    .'data-origname="'. (!$uid ? 'Pilt' : $row['origname']) .'" data-filename="'. $row['filename']
+                    . (!$uid ? '' : '" data-owner="'. ($row['userid'] == $uid ? "y" : "n"))
+                    .'" data-ratings="'. $ratings .'" title="Vaata suuremalt">'
+                    .'<div class="card m-0 p-0"><img class="img-thumbnail card-img" src="'. $row['thumb'] .'" alt="'
+                    . $row['alttext'] .'">'. $icn .'</div></a><div class="container mt-2">'
+                    // Pildi autor/nupud ja üleslaadimise kuupäev (EXIF olemasolul info ikoonike)
+                    . $name .'<p><small class="text-secondary">'. ( !$bI ? '' :
+                            '<a class="mr-2" href="#'. $id .'e" data-toggle="modal" title="info">'. self::$icons[0] .'</a>')
+                    . $row['created'] .'</small></p></div></div>';
+
+            if ($uid) {
+                $modalE .= "\n" .'<div class="modal fade" id="'. $id .'e">'
+                        .'<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal"><div class="modal-content">'
+                        // Dialoogi päis faili originaalnimega
+                        .'<div class="modal-header"><h4 class="modal-title">'. $row['origname']
+                        .'</h4><button type="button" class="close" data-dismiss="modal">&times;</button></div>'
+                        // Dialoogi keha EXIF infoga
+                        .'<div class="modal-body"><ul class="list-group">'. "\n";
+                foreach ($exif as $key => $section) {
+                    foreach ($section as $name => $val) {
+                        $modalE .= '<li class="list-group-item"><b>'. $key .'</b>.'. $name
+                                .' &nbsp; <span class="badge badge-info badge-pill">'. $val .'</span></li>';
+                    }
+                }
+                $modalE .= "\n" .'</ul></div>'
+                        // Dialoogi jalus sulgemisnupuga
+                        .'<div class="modal-footer">'
+                        .'<button type="button" class="btn btn-danger" data-dismiss="modal">Sulge</button>'
+                        .'</div></div></div></div>';
+                }
         }
 
         return [$response, $modal ."\n", $modalE ."\n"];
@@ -360,6 +473,31 @@ class Photo {
                 ->q($imgId, 'i')->fetch();
 
         return $result['userid'] ?? 0;
+    }
+
+    public static function getTotalImages($privacy) {
+        $uid = $_SESSION['userid'] ?? 0;
+        $result = (new DB())
+                ->select(['COUNT(*) AS totalImages', 'userid'])
+                ->from('photos')
+                ->where()
+                    ->isNull('deleted')
+                    ->and(true)->eq(['userid', '?'])  // and(true) - avab sulu
+                    ->or()->lt(['privacy', '?'])        // lisab sulgeva sulu automaatselt
+                ->q([$uid, $privacy], 'ii')  // SQL päringu sooritamine, andes ette bind_param() argumendid
+                ->fetch();
+
+        return $result['totalImages'] ?? 0;
+    }
+
+    public static function getImageRatings($imgId) {
+        $result = (new DB())
+                ->select('AVG(rating) AS avgValue')
+                ->from('photoratings')
+                ->where()->eq(['photoid', '?'])
+                ->q($imgId, 'i')->fetch();
+        
+        return str_replace('.', ',', round($result['avgValue'], 2)) ?? 0;
     }
 
     public static function deleteImage($id) {
@@ -376,6 +514,22 @@ class Photo {
         //~ Väljastab kas kustutamine läks korda või mitte
         if ($ok) echo 'OK!';
         else     echo $db->stmtError;
+    }
+
+    public static function rateImage($id, $rating) {
+        $params = [$id, $_SESSION["userid"], $rating];
+
+        $db = (new DB())
+                ->insert('photoratings', ['photoid', 'userid', 'rating'])
+                ->values($params)
+                ->q($params, 'iii');
+        
+        if ($db->affectedRows() == -1) {
+            echo '';
+        }
+        else {
+            echo Photo::getImageRatings($id);
+        }
     }
 
 

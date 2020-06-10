@@ -9,6 +9,7 @@ define("SESSION_PATH", '/~juri.kormik/veebirakendused/');
 define("SESSION_DOMAIN", 'tigu.hk.tlu.ee');
 // Tabelinime eesliide
 define("SQL_TABLE_PREFIX", 'vr20__');
+define("TABLE_PREFIX", SQL_TABLE_PREFIX);  // tagasiühilduvus 3. loengule
 
 
 // Mõned globaalsed muutujad

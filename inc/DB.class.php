@@ -268,8 +268,8 @@ class DB {
         $this->_sql .= ' ORDER BY '. implode(', ', $r);
         return $this;
     }
-    function limit() {
-        $this->_sql .= 'LIMIT ?';
+    function limit($len = false) {
+        $this->_sql .= ' LIMIT ?'. ($len ? ',?' : '');
         return $this;
     }
 

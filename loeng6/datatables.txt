@@ -1,0 +1,11 @@
+
+    Fotode hinnangud
+
+CREATE TABLE `jurikormik`.`vr20__photoratings` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT ,
+    `photoid` INT(11) NOT NULL ,
+    `userid` INT(11) NOT NULL ,
+    `rating` INT(1) NOT NULL ,
+    `added` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB;
