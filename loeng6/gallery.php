@@ -12,7 +12,7 @@ if (isset($_POST["imagesPerPage"])) {
 }
 
 
-// Privaatsustase (võrdlemiseks):  2 - avalik,  3 - sisseloginud kasutaja
+// Privaatsustase (võrdlemiseks):  3 - avalik,  2 - sisseloginud kasutaja
 $privacy = 2;
 if (isset($_SESSION["userid"])) $privacy = 3;
 else { $_SESSION['errPage'] = $_self; }  // muudab lehe nime, kuhu peale sisselogimist minna
